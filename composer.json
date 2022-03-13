@@ -1,0 +1,15 @@
+{
+    "name": "shop/shop",
+    "authors": [
+        {
+            "name": "Bakalavr Dankovskiy",
+            "email": "bakalavr.dankovskiy@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/App"
+        }
+    }
+}
