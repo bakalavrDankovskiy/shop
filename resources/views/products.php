@@ -1,5 +1,8 @@
 <main class="page-products">
   <h1 class="h h--1">Товары</h1>
+    <br>
+    <?php flash('error') ?>
+    <br>
   <a class="page-products__button button" href="/admin/products/add">Добавить товар</a>
   <div class="page-products__header">
     <span class="page-products__header-field">Название товара</span>

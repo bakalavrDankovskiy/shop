@@ -232,7 +232,7 @@ if (shopList) {
 
 async function saveOrder(order) { // <- product object
 
-    const response = await fetch('http://shop/orders', {
+    const response = await fetch(location.origin + '/orders', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",  // sent request
@@ -346,91 +346,105 @@ $(async function () {
 
     if (document.querySelector('.shop-page')) {
         const products = await fetchProducts();
-        const sortedProducts = sortProducts
-        (products,
-            urlParamsObject.sortOption ?? 'price',
-            urlParamsObject.sortOrder ?? 'asc'
-        );
-        const paginatedProducts = paginateProducts(sortedProducts);
-        let currentPage;
-        let numberOfPages;
-        if (paginatedProducts.length > 0) {
-            numberOfPages = paginatedProducts.length;
-            if (numberOfPages) {
-                if (isPageParamNotSet()) {
-                    setPageParamAndRedirect();
+        if (products) {
+            const sortedProducts = sortProducts
+            (products,
+                urlParamsObject.sortOption ?? 'price',
+                urlParamsObject.sortOrder ?? 'asc'
+            );
+            const paginatedProducts = paginateProducts(sortedProducts);
+            let currentPage;
+            let numberOfPages;
+            if (paginatedProducts.length > 0) {
+                numberOfPages = paginatedProducts.length;
+                if (numberOfPages) {
+                    if (isPageParamNotSet()) {
+                        setPageParamAndRedirect();
+                    }
+                    currentPage = urlParamsObject.page;
+                    setSortingResNumber(paginatedProducts);
+                    renderPagination(numberOfPages, currentPage);
                 }
-                currentPage = urlParamsObject.page;
-                setSortingResNumber(paginatedProducts);
-                renderPagination(numberOfPages, currentPage);
-            }
-            $('.paginator__item').on('click', (e) => {
-                setPageParamAndRedirect(e.target.innerHTML);
-            });
-            renderShopList(paginatedProducts, currentPage);
+                $('.paginator__item').on('click', (e) => {
+                    setPageParamAndRedirect(e.target.innerHTML);
+                });
+                renderShopList(paginatedProducts, currentPage);
 
-            $('.shop__item').click((e) => {
-                window.urlParamsObject.product = {
-                    id: '',
-                    price: '',
-                    deliveryInfo: {},
-                }
-                if (e.target.classList.contains('shop__item')) {
-                    e.target.childNodes.forEach((el) => {
-                        if (el.id === 'product__id') {
-                            window.urlParamsObject.product.id = el.value;
-                        }
-                        if (el.classList.contains('product__price')) {
-                            window.urlParamsObject.product.price = el.innerText.replace(' руб.', '');
-                        }
-                    });
-                }
-                if (e.target.parentNode.classList.contains('shop__item')) {
-                    e.parentNode.childNodes.forEach((el) => {
-                        if (el.id === 'product__id') {
-                            window.urlParamsObject.product.id = el.value;
-                        }
-                        if (el.classList.contains('product__price')) {
-                            window.urlParamsObject.product.price = el.innerText.replace(' руб.', '');
-                        }
-                    });
-                }
-            });
+                $('.shop__item').click((e) => {
+                    window.urlParamsObject.product = {
+                        id: '',
+                        price: '',
+                        deliveryInfo: {},
+                    }
+                    if (e.target.classList.contains('shop__item')) {
+                        e.target.childNodes.forEach((el) => {
+                            if (el.id === 'product__id') {
+                                window.urlParamsObject.product.id = el.value;
+                            }
+                            if (el.classList.contains('product__price')) {
+                                window.urlParamsObject.product.price = el.innerText.replace(' руб.', '');
+                            }
+                        });
+                    }
+                    if (e.target.parentNode.classList.contains('shop__item')) {
+                        e.parentNode.childNodes.forEach((el) => {
+                            if (el.id === 'product__id') {
+                                window.urlParamsObject.product.id = el.value;
+                            }
+                            if (el.classList.contains('product__price')) {
+                                window.urlParamsObject.product.price = el.innerText.replace(' руб.', '');
+                            }
+                        });
+                    }
+                });
+            }
         }
     }
 
     if (document.querySelector('.page-order')) {
         const orders = await fetchOrders();
-        if (await orders.length > 0) {
-            renderOrdersList(sortOrders(await orders));
+
+        if (orders) {
+            if (await orders.length > 0) {
+                renderOrdersList(sortOrders(await orders));
+            }
         }
     }
 
     if (document.querySelector('.page-products')) {
         let products = await fetchProducts();
-        if (products.length !== 0) {
-            renderAdminProductsList(products);
 
-            $('.product-item__delete').click(async (e) => {
-                const id = e.target.parentNode.querySelector('#id').innerText;
-                const result = await deleteAdminProduct(id)
-                if (result) {
-                    e.target.parentNode.remove()
-                }
-            })
-        } else {
-            renderAdminNoProductsNotice();
+        if (products) {
+            if (products.length !== 0) {
+                renderAdminProductsList(products);
+
+                $('.product-item__delete').click(async (e) => {
+                    const id = e.target.parentNode.querySelector('#id').innerText;
+                    const result = await deleteAdminProduct(id)
+                    if (result) {
+                        e.target.parentNode.remove()
+                    }
+                })
+            } else {
+                renderAdminNoProductsNotice();
+            }
         }
     }
 
     async function fetchOrders() {
-        const response = await fetch('http://shop/getorders/');
+        const response = await fetch(location.origin + '/getorders/');
         if (response.ok) {
-            const orders = await response.json()
-            orders.forEach(order => {
+            const result = await response.json()
+
+            if (result.error && result.error !== 0) {
+                alert(result.error);
+                return false;
+            }
+
+            result.forEach(order => {
                 order.delivery_info = JSON.parse(order.delivery_info)
             });
-            return orders;
+            return result;
         } else {
             alert("Ошибка HTTP: " + response.status);
             return false;
@@ -715,18 +729,21 @@ $(async function () {
 
     async function fetchProducts() {
         const filterParams = window.location.search.replace('?', '');
-        const doAjax = async () => {
-            const response = await fetch('http://shop/products/?' + filterParams);
-            if (response.ok) {
-                const jVal = await response.json();
-                return Promise.resolve(jVal);
-            } else {
-                return Promise.reject('Something wrong!');
+
+        const response = await fetch(location.origin + '/products/?' + filterParams);
+        if (response.ok) {
+            const result = await response.json();
+
+            if (result.error && result.error !== 0) {
+                alert(result.error);
+                return false;
             }
-        }
-        return await doAjax().then((result) => {
+
             return result;
-        });
+        } else {
+            alert("Ошибка HTTP: " + response.status);
+            return false;
+        }
     }
 
     function paginateProducts(products, perPage = 10) {

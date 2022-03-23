@@ -3,17 +3,13 @@
 namespace App;
 
 use PDO;
+use PDOException;
 
 class DB
 {
-    private $host = 'localhost';
-    private $user = 'root';
-    private $password = 'root';
-    private $dbname = 'shop';
-
     /**
      * Will be the PDO object
-    **/
+     **/
     private $dbh;
     private $stmt;
 
@@ -22,19 +18,24 @@ class DB
         /**
          * Set DSN
          */
-        $dsn = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname;
-        $options = array(
+        $dsn = Config::DRIVER .
+            ':host=' . Config::HOST .
+            ';dbname=' . Config::DBNAME .
+            ';charset=' . Config::CHARSET;
+        $options = [
             PDO::ATTR_PERSISTENT => true,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-        );
+        ];
 
         /**
          * Create PDO instance
          */
         try {
-            $this->dbh = new PDO($dsn, $this->user, $this->password, $options);
+            $this->dbh = new PDO($dsn, Config::USER, Config::PASSWORD, $options);
         } catch (PDOException $e) {
-            dd($e->getMessage());
+            $dieMessage = "Не удается подключиться к базе данных";
+            flash("error", $dieMessage, "danger");
+            dieWithErrorMessage($dieMessage);
         }
     }
 

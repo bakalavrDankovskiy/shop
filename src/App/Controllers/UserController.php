@@ -30,20 +30,20 @@ class UserController
 
 
         if (!preg_match("/^[a-zA-Z0-9]*$/", $data['name'])) {
-            flash("register", "Invalid name", "danger");
+            flash("error", "Invalid name", "danger");
             redirect("/signup");
         }
 
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            flash("register", "Invalid email", "danger");
+            flash("error", "Invalid email", "danger");
             redirect("/signup");
         }
 
         if (strlen($data['password']) < 6) {
-            flash("register", "Password must be contain more than 6 symbols", "danger");
+            flash("error", "Password must be contain more than 6 symbols", "danger");
             redirect("/signup");
         } else if ($data['password'] !== $data['passwordRepeat']) {
-            flash("register", "Passwords don't match", "danger");
+            flash("error", "Passwords don't match", "danger");
             redirect("/signup");
         }
 
@@ -51,7 +51,7 @@ class UserController
          * check if user with the same email or password already exists
          */
         if ($this->userModel->findUserByEmail($data['email'])) {
-            flash("register", "Email already taken", "danger");
+            flash("error", "Email already taken", "danger");
             redirect("/signup");
         }
 
@@ -63,7 +63,7 @@ class UserController
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
 
         if ($this->userModel->register($data)) {
-            flash("login", "Now you are registered, please log in", "success");
+            flash("success", "Now you are registered, please log in", "success");
             redirect("/auth");
         } else {
             die("Something went wrong");
@@ -83,7 +83,7 @@ class UserController
         ];
 
         if (empty($data['email']) || empty($data['password'])) {
-            flash("login", "Please fill out all inputs", 'danger');
+            flash("error", "Please fill out all inputs", 'danger');
             redirect("/auth");
             exit();
         }
@@ -96,11 +96,11 @@ class UserController
                 //Create session
                 $this->createUserSession($loggedInUser);
             } else {
-                flash("login", "Password Incorrect", 'danger');
+                flash("error", "Password Incorrect", 'danger');
                 redirect("/auth");
             }
         } else {
-            flash("login", "No user with email: " . $data['email'] . " was found", 'danger');
+            flash("error", "No user with email: " . $data['email'] . " was found", 'danger');
             redirect("/auth");
         }
     }

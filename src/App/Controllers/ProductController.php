@@ -225,9 +225,18 @@ class ProductController
             $categories = [];
         }
 
-        $products = $this->productModel->where($minPrice, $maxPrice, $categories);
+        try {
+            $products = $this->productModel->where($minPrice, $maxPrice, $categories);
 
-        return json_encode($products);
+            if(!empty($products)){
+                return json_encode($products);
+            } else {
+                return json_encode(['error']);
+            }
+
+        } catch (\PDOException $e) {
+            redirect("/notFound");
+        }
     }
 
     public function findById()

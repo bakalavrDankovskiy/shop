@@ -7,7 +7,7 @@ use App\View\View;
 
 class NotFoundException extends HttpException implements Renderable
 {
-    protected $message = 'Запрошенному url не соответствует ни один установленный маршрут (Route)';
+    protected $message = 'Страница не найдена';
 
     public function render()
     {
