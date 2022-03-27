@@ -31,3 +31,8 @@ function redirect($location)
     header("location: " . $location);
     exit();
 }
+
+function dieWithErrorMessage(string $message)
+{
+    die(json_encode(['error' => "$message"]));
+}

@@ -6,7 +6,9 @@
             "email": "bakalavr.dankovskiy@gmail.com"
         }
     ],
-    "require": {},
+    "require": {
+      "ext-pdo": "*"
+    },
     "autoload": {
         "psr-4": {
             "App\\": "src/App"

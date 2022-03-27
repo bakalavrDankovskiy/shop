@@ -55,6 +55,10 @@
         </section>
 
         <div class="shop__wrapper">
+            <br>
+            <?php flash('error') ?>
+            <?php flash('success') ?>
+            <br>
             <section class="shop__sorting">
                 <div class="shop__sorting-item custom-form__select-wrapper">
                     <select class="custom-form__select" name="sortOption" id="sortOption">

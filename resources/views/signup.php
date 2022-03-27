@@ -1,7 +1,10 @@
 <main class="page-authorization">
     <h1 class="h h--1">Регистрация</h1>
     <form class="custom-form needs-validation" action="/signup" method="post" >
-        <?php flash('register') ?>
+
+        <?php flash('error') ?>
+        <?php flash('success') ?>
+
         <input name="name" class="custom-form__input name form-control" placeholder="Name" required="">
         <input name="email" type="email" class="custom-form__input email form-control" placeholder="Email" required="">
 
